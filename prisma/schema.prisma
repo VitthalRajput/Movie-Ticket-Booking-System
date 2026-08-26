@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  bookings     Booking[]
+
+  @@map("users")
+}
+
+model Movie {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  durationMin  Int        @map("duration_min")
+  posterUrl    String?    @map("poster_url")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  showtimes    Showtime[]
+
+  @@map("movies")
+}
+
+model Showtime {
+  id           String    @id @default(uuid())
+  movieId      String    @map("movie_id")
+  theatre      String
+  screenNumber Int       @map("screen_number")
+  showTime     DateTime  @map("show_time")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  movie        Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  seats        Seat[]
+  bookings     Booking[]
+
+  @@map("showtimes")
+}
+
+model Seat {
+  id            String        @id @default(uuid())
+  showtimeId    String        @map("showtime_id")
+  seatNumber    String        @map("seat_number")
+  rowLabel      String        @map("row_label")
+  status        String        @default("available")
+  heldBy        String?       @map("held_by")
+  holdExpiresAt DateTime?     @map("hold_expires_at")
+  version       Int           @default(0)
+
+  showtime      Showtime      @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  bookingSeats  BookingSeat[]
+
+  @@unique([showtimeId, seatNumber, rowLabel])
+  @@map("seats")
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  userId       String        @map("user_id")
+  showtimeId   String        @map("showtime_id")
+  status       String        @default("pending")
+  totalAmount  Decimal?      @map("total_amount")
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id])
+  showtime     Showtime      @relation(fields: [showtimeId], references: [id])
+  bookingSeats BookingSeat[]
+  payment      Payment?
+  outboxEvents OutboxEvent[]
+
+  @@map("bookings")
+}
+
+model BookingSeat {
+  bookingId String  @map("booking_id")
+  seatId    String  @map("seat_id")
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seat      Seat    @relation(fields: [seatId], references: [id])
+
+  @@id([bookingId, seatId])
+  @@map("booking_seats")
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  bookingId       String   @unique @map("booking_id")
+  stripeIntentId  String?  @unique @map("stripe_intent_id")
+  amount          Decimal
+  status          String   @default("pending")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  booking         Booking  @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+model OutboxEvent {
+  id        String   @id @default(uuid())
+  bookingId String   @map("booking_id")
+  eventType String   @map("event_type")
+  payload   Json?
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+
+  @@map("outbox_events")
+}
+
+model IdempotencyKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  response  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("idempotency_keys")
+}
