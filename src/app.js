@@ -1,5 +1,10 @@
 import express from "express";
 
+// import authRoutes from ".src/routes/auth.routes.js";
+// import movieRoutes from ".src/routes/movie.routes.js";
+// import showtimeRoutes from ".src/routes/showtime.routes.js";
+// import seatRoutes from ".src/routes/seat.routes.js";
+
 import authRoutes from "./routes/auth.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
 import showtimeRoutes from "./routes/showtime.routes.js";

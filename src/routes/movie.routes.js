@@ -6,7 +6,7 @@ import {
     getMovieById,
     updateMovie,
     deleteMovie,
-} from "../controllers/movie.controller.js";
+} from "../controllers/movies.controller.js";
 
 import { verifyJWT } from "../middlewares/verifyJWT.middleware.js";
 import { verifyAdmin } from "../middlewares/verifyAdmin.middleware.js";
