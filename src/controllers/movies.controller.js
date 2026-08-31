@@ -46,9 +46,7 @@ const getMovies = asyncHandler(async (req, res) => {
 });
 
 
-// ==========================================
 // GET MOVIE BY ID
-// ==========================================
 
 const getMovieById = asyncHandler(async (req, res) => {
 
