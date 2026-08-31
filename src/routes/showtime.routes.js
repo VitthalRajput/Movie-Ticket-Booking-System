@@ -1,21 +1,21 @@
 import { Router } from "express";
 
 import {
-    createMovie,
-    getMovies,
-    getMovieById,
-    updateMovie,
-    deleteMovie,
-} from "../controllers/movie.controller.js";
+    createShowtime,
+    getShowtimes,
+    getShowtimeById,
+    updateShowtime,
+    deleteShowtime,
+} from "../controllers/showtime.controller.js";
 
 import { verifyJWT } from "../middlewares/verifyJWT.middleware.js";
 import { verifyAdmin } from "../middlewares/verifyAdmin.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 
 import {
-    createMovieSchema,
-    updateMovieSchema,
-} from "../validators/movie.schema.js";
+    createShowtimeSchema,
+    updateShowtimeSchema,
+} from "../validators/showtime.schema.js";
 
 import {
     uuidParamSchema,
@@ -29,16 +29,18 @@ const router = Router();
 // PUBLIC ROUTES
 // ==========================================
 
+// GET /api/showtimes
 router
     .route("/")
-    .get(getMovies);
+    .get(getShowtimes);
 
 
+// GET /api/showtimes/:id
 router
     .route("/:id")
     .get(
         validate(uuidParamSchema, "params"),
-        getMovieById
+        getShowtimeById
     );
 
 
@@ -46,34 +48,37 @@ router
 // ADMIN ROUTES
 // ==========================================
 
+// POST /api/showtimes
 router
     .route("/")
     .post(
         verifyJWT,
         verifyAdmin,
-        validate(createMovieSchema),
-        createMovie
+        validate(createShowtimeSchema),
+        createShowtime
     );
 
 
+// PATCH /api/showtimes/:id
 router
     .route("/:id")
     .patch(
         verifyJWT,
         verifyAdmin,
         validate(uuidParamSchema, "params"),
-        validate(updateMovieSchema),
-        updateMovie
+        validate(updateShowtimeSchema),
+        updateShowtime
     );
 
 
+// DELETE /api/showtimes/:id
 router
     .route("/:id")
     .delete(
         verifyJWT,
         verifyAdmin,
         validate(uuidParamSchema, "params"),
-        deleteMovie
+        deleteShowtime
     );
 
 
