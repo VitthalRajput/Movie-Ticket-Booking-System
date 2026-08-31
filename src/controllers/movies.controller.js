@@ -1,7 +1,13 @@
-import { prisma } from "../config/prisma.js";
-import { ApiError } from "../utils/ApiError.js";
-import {ApiResponse} from "../utils/ApiResponse.js";
-import {asyncHandler} from "../utils/asyncHandler.js";
+import {
+    createMovie as createMovieService,
+    getMovies as getMoviesService,
+    getMovieById as getMovieByIdService,
+    updateMovie as updateMovieService,
+    deleteMovie as deleteMovieService,
+} from "../services/movie.service.js";
+
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 // ==========================================
@@ -9,21 +15,8 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 // ==========================================
 
 const createMovie = asyncHandler(async (req, res) => {
-    const {
-        title,
-        description,
-        durationMin,
-        posterUrl,
-    } = req.body;
 
-    const movie = await prisma.movie.create({
-        data: {
-            title,
-            description,
-            durationMin,
-            posterUrl,
-        },
-    });
+    const movie = await createMovieService(req.body);
 
     return res.status(201).json(
         new ApiResponse(
@@ -40,11 +33,8 @@ const createMovie = asyncHandler(async (req, res) => {
 // ==========================================
 
 const getMovies = asyncHandler(async (req, res) => {
-    const movies = await prisma.movie.findMany({
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+
+    const movies = await getMoviesService();
 
     return res.status(200).json(
         new ApiResponse(
@@ -61,20 +51,10 @@ const getMovies = asyncHandler(async (req, res) => {
 // ==========================================
 
 const getMovieById = asyncHandler(async (req, res) => {
+
     const { id } = req.params;
 
-    const movie = await prisma.movie.findUnique({
-        where: {
-            id,
-        },
-    });
-
-    if (!movie) {
-        throw new ApiError(
-            404,
-            "Movie not found"
-        );
-    }
+    const movie = await getMovieByIdService(id);
 
     return res.status(200).json(
         new ApiResponse(
@@ -86,53 +66,17 @@ const getMovieById = asyncHandler(async (req, res) => {
 });
 
 
-// ==========================================
+
 // UPDATE MOVIE
-// ==========================================
 
 const updateMovie = asyncHandler(async (req, res) => {
+
     const { id } = req.params;
 
-    const {
-        title,
-        description,
-        durationMin,
-        posterUrl,
-    } = req.body;
-
-    const existingMovie = await prisma.movie.findUnique({
-        where: {
-            id,
-        },
-    });
-
-    if (!existingMovie) {
-        throw new ApiError(
-            404,
-            "Movie not found"
-        );
-    }
-
-    const movie = await prisma.movie.update({
-        where: {
-            id,
-        },
-        data: {
-            ...(title !== undefined && { title }),
-
-            ...(description !== undefined && {
-                description,
-            }),
-
-            ...(durationMin !== undefined && {
-                durationMin,
-            }),
-
-            ...(posterUrl !== undefined && {
-                posterUrl,
-            }),
-        },
-    });
+    const movie = await updateMovieService(
+        id,
+        req.body
+    );
 
     return res.status(200).json(
         new ApiResponse(
@@ -149,26 +93,10 @@ const updateMovie = asyncHandler(async (req, res) => {
 // ==========================================
 
 const deleteMovie = asyncHandler(async (req, res) => {
+
     const { id } = req.params;
 
-    const existingMovie = await prisma.movie.findUnique({
-        where: {
-            id,
-        },
-    });
-
-    if (!existingMovie) {
-        throw new ApiError(
-            404,
-            "Movie not found"
-        );
-    }
-
-    await prisma.movie.delete({
-        where: {
-            id,
-        },
-    });
+    await deleteMovieService(id);
 
     return res.status(200).json(
         new ApiResponse(
