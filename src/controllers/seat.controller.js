@@ -1,6 +1,7 @@
 import {
     createSeat as createSeatService,
     getSeatsByShowtime as getSeatsByShowtimeService,
+    holdSeat as holdSeatService,
 } from "../services/seat.service.js";
 
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -51,7 +52,33 @@ const getSeatsByShowtime = asyncHandler(async (req, res) => {
 });
 
 
+// ==========================================
+// HOLD SEAT
+// ==========================================
+
+const holdSeat = asyncHandler(async (req, res) => {
+
+    const { seatId } = req.params;
+
+    const userId = req.user.id;
+
+    const seat = await holdSeatService({
+        seatId,
+        userId,
+    });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            seat,
+            "Seat held successfully"
+        )
+    );
+});
+
+
 export {
     createSeat,
     getSeatsByShowtime,
+    holdSeat,
 };
