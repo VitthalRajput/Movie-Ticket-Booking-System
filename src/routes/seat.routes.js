@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
     createSeat,
     getSeatsByShowtime,
+    holdSeat,
 } from "../controllers/seat.controller.js";
 
 import { verifyJWT } from "../middlewares/verifyJWT.middleware.js";
@@ -11,6 +12,7 @@ import { validate } from "../middlewares/validate.middleware.js";
 
 import {
     createSeatSchema,
+    seatIdParamSchema,
 } from "../validators/seat.schema.js";
 
 import {
@@ -22,7 +24,7 @@ const router = Router();
 
 
 // ==========================================
-// GET SEATS FOR SHOWTIME
+// GET SEATS
 // ==========================================
 
 // GET /api/showtimes/:showtimeId/seats
@@ -61,6 +63,27 @@ router
         ),
 
         createSeat
+    );
+
+
+// ==========================================
+// HOLD SEAT
+// ==========================================
+
+// POST /api/seats/:seatId/hold
+
+router
+    .post(
+        "/seats/:seatId/hold",
+
+        verifyJWT,
+
+        validate(
+            seatIdParamSchema,
+            "params"
+        ),
+
+        holdSeat
     );
 
 
