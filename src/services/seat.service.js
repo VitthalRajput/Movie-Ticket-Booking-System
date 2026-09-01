@@ -7,6 +7,7 @@ import {
     create,
     findByShowtimeId,
     holdSeat as holdSeatRepository,
+    releaseSeatHold as releaseSeatHoldRepository,
 } from "../repositories/seat.repository.js";
 
 import {
@@ -100,7 +101,7 @@ const holdSeat = async ({
 
 
     // --------------------------------------
-    // 2. Check whether current hold is valid
+    // 2. Check current hold
     // --------------------------------------
 
     const now = new Date();
@@ -112,7 +113,7 @@ const holdSeat = async ({
 
 
     // --------------------------------------
-    // 3. Prevent stealing another user's hold
+    // 3. Prevent stealing active hold
     // --------------------------------------
 
     if (isCurrentlyHeld) {
@@ -174,8 +175,87 @@ const holdSeat = async ({
 };
 
 
+// ==========================================
+// RELEASE SEAT HOLD
+// ==========================================
+
+const releaseSeatHold = async ({
+    seatId,
+    userId,
+}) => {
+
+    // --------------------------------------
+    // 1. Find seat
+    // --------------------------------------
+
+    const seat = await findById(seatId);
+
+    if (!seat) {
+        throw new ApiError(
+            404,
+            "Seat not found"
+        );
+    }
+
+
+    // --------------------------------------
+    // 2. Check seat state
+    // --------------------------------------
+
+    if (seat.status !== "held") {
+        throw new ApiError(
+            409,
+            "Seat is not currently held"
+        );
+    }
+
+
+    // --------------------------------------
+    // 3. Verify ownership
+    // --------------------------------------
+
+    if (seat.heldBy !== userId) {
+        throw new ApiError(
+            403,
+            "You do not own this seat hold"
+        );
+    }
+
+
+    // --------------------------------------
+    // 4. Release atomically
+    // --------------------------------------
+
+    const result =
+        await releaseSeatHoldRepository({
+            seatId,
+            userId,
+        });
+
+
+    // --------------------------------------
+    // 5. Detect race condition
+    // --------------------------------------
+
+    if (result.count === 0) {
+        throw new ApiError(
+            409,
+            "Seat hold could not be released"
+        );
+    }
+
+
+    // --------------------------------------
+    // 6. Return updated seat
+    // --------------------------------------
+
+    return findById(seatId);
+};
+
+
 export {
     createSeat,
     getSeatsByShowtime,
     holdSeat,
+    releaseSeatHold,
 };

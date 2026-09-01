@@ -61,6 +61,10 @@ app.use(
     seatRoutes
 );
 
+//carefull
+app.use("/api/seats", seatRoutes);
+//carefull
+
 
 // ==========================================
 // 404 HANDLER

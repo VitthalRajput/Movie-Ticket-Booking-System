@@ -2,6 +2,7 @@ import {
     createSeat as createSeatService,
     getSeatsByShowtime as getSeatsByShowtimeService,
     holdSeat as holdSeatService,
+    releaseSeatHold as releaseSeatHoldService,
 } from "../services/seat.service.js";
 
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -77,8 +78,34 @@ const holdSeat = asyncHandler(async (req, res) => {
 });
 
 
+// ==========================================
+// RELEASE SEAT HOLD
+// ==========================================
+
+const releaseSeatHold = asyncHandler(async (req, res) => {
+
+    const { seatId } = req.params;
+
+    const userId = req.user.id;
+
+    const seat = await releaseSeatHoldService({
+        seatId,
+        userId,
+    });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            seat,
+            "Seat hold released successfully"
+        )
+    );
+});
+
+
 export {
     createSeat,
     getSeatsByShowtime,
     holdSeat,
+    releaseSeatHold,
 };
