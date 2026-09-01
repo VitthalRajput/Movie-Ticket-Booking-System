@@ -18,6 +18,19 @@ const findShowtimeById = (showtimeId) => {
 // FIND SEAT
 // ==========================================
 
+const findById = (seatId) => {
+    return prisma.seat.findUnique({
+        where: {
+            id: seatId,
+        },
+    });
+};
+
+
+// ==========================================
+// FIND SEAT BY DETAILS
+// ==========================================
+
 const findBySeatDetails = ({
     showtimeId,
     seatNumber,
@@ -45,7 +58,7 @@ const create = (data) => {
 
 
 // ==========================================
-// GET SEATS FOR SHOWTIME
+// GET SEATS BY SHOWTIME
 // ==========================================
 
 const findByShowtimeId = (showtimeId) => {
@@ -65,9 +78,55 @@ const findByShowtimeId = (showtimeId) => {
 };
 
 
+// ==========================================
+// HOLD SEAT
+// ==========================================
+
+const holdSeat = async ({
+    seatId,
+    userId,
+    expectedVersion,
+    holdExpiresAt,
+}) => {
+
+    const result = await prisma.seat.updateMany({
+        where: {
+            id: seatId,
+
+            version: expectedVersion,
+
+            OR: [
+                {
+                    status: "available",
+                },
+                {
+                    status: "held",
+                    holdExpiresAt: {
+                        lt: new Date(),
+                    },
+                },
+            ],
+        },
+
+        data: {
+            status: "held",
+            heldBy: userId,
+            holdExpiresAt,
+            version: {
+                increment: 1,
+            },
+        },
+    });
+
+    return result;
+};
+
+
 export {
     findShowtimeById,
+    findById,
     findBySeatDetails,
     create,
     findByShowtimeId,
+    holdSeat,
 };
