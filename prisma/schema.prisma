@@ -47,12 +47,20 @@ model Showtime {
   @@map("showtimes")
 }
 
+
+enum SeatStatus {
+    available
+    held
+    booked
+}
+
+
 model Seat {
   id            String        @id @default(uuid())
   showtimeId    String        @map("showtime_id")
   seatNumber    String        @map("seat_number")
   rowLabel      String        @map("row_label")
-  status        String        @default("available")
+  status SeatStatus @default(available)
   heldBy        String?       @map("held_by")
   holdExpiresAt DateTime?     @map("hold_expires_at")
   version       Int           @default(0)

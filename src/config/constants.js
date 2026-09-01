@@ -1,0 +1,5 @@
+const SEAT_HOLD_DURATION_MINUTES = 5;
+
+export {
+    SEAT_HOLD_DURATION_MINUTES,
+};

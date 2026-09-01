@@ -2,7 +2,7 @@ import { z } from "zod";
 
 
 // ==========================================
-// CREATE SEAT SCHEMA
+// CREATE SEAT
 // ==========================================
 
 const createSeatSchema = z.object({
@@ -20,6 +20,23 @@ const createSeatSchema = z.object({
 });
 
 
+// ==========================================
+// SEAT ID PARAM
+// ==========================================
+
+const seatIdParamSchema = z.object({
+    seatId: z
+        .string()
+        .uuid("Invalid seat ID"),
+});
+
+
 export {
     createSeatSchema,
+    seatIdParamSchema,
 };
+
+
+// We don't need a holdSeatSchema because there is currently no body for:
+
+// POST /api/seats/:seatId/hold ----- POST request 
