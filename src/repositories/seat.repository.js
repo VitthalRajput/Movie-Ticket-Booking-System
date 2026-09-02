@@ -153,6 +153,34 @@ const releaseSeatHold = async ({
     return result;
 };
 
+// ==========================================
+// RELEASE EXPIRED SEAT HOLDS
+// ==========================================
+
+const releaseExpiredSeatHolds = async () => {
+
+    const result = await prisma.seat.updateMany({
+        where: {
+            status: "held",
+
+            holdExpiresAt: {
+                lte: new Date(),
+            },
+        },
+
+        data: {
+            status: "available",
+            heldBy: null,
+            holdExpiresAt: null,
+
+            version: {
+                increment: 1,
+            },
+        },
+    });
+
+    return result;
+};
 
 export {
     findShowtimeById,
@@ -162,4 +190,5 @@ export {
     findByShowtimeId,
     holdSeat,
     releaseSeatHold,
+    releaseExpiredSeatHolds,
 };
