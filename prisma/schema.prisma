@@ -76,7 +76,7 @@ model Seat {
   showtimeId    String        @map("showtime_id")
   seatNumber    String        @map("seat_number")
   rowLabel      String        @map("row_label")
-  status SeatStatus @default(available)
+  status SeatStatus @default(available)       
   heldBy        String?       @map("held_by")
   holdExpiresAt DateTime?     @map("hold_expires_at")
   version       Int           @default(0)
