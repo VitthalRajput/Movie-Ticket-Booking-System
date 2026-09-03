@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  processing
+  succeeded
+  failed
+  refunded
+}
+
 model User {
   id           String    @id @default(uuid())
   name         String
@@ -55,6 +69,8 @@ enum SeatStatus {
 }
 
 
+
+
 model Seat {
   id            String        @id @default(uuid())
   showtimeId    String        @map("showtime_id")
@@ -76,7 +92,7 @@ model Booking {
   id           String        @id @default(uuid())
   userId       String        @map("user_id")
   showtimeId   String        @map("showtime_id")
-  status       String        @default("pending")
+  status       BookingStatus         @default(pending)
   totalAmount  Decimal?      @map("total_amount")
   createdAt    DateTime      @default(now()) @map("created_at")
 
@@ -100,12 +116,13 @@ model BookingSeat {
   @@map("booking_seats")
 }
 
+
 model Payment {
   id              String   @id @default(uuid())
   bookingId       String   @unique @map("booking_id")
   stripeIntentId  String?  @unique @map("stripe_intent_id")
   amount          Decimal
-  status          String   @default("pending")
+  status          PaymentStatus    @default(pending)
   createdAt       DateTime @default(now()) @map("created_at")
 
   booking         Booking  @relation(fields: [bookingId], references: [id])
