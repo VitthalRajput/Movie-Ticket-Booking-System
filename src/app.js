@@ -1,14 +1,20 @@
 import express from "express";
 
-// import authRoutes from ".src/routes/auth.routes.js";
-// import movieRoutes from ".src/routes/movie.routes.js";
-// import showtimeRoutes from ".src/routes/showtime.routes.js";
-// import seatRoutes from ".src/routes/seat.routes.js";
+// ==========================================
+// ROUTES
+// ==========================================
 
 import authRoutes from "./routes/auth.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
 import showtimeRoutes from "./routes/showtime.routes.js";
 import seatRoutes from "./routes/seat.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
+
+// ==========================================
+// MIDDLEWARE
+// ==========================================
+
+import { errorHandler } from "./middlewares/errorHandler.middleware.js";
 
 
 const app = express();
@@ -18,11 +24,15 @@ const app = express();
 // GLOBAL MIDDLEWARES
 // ==========================================
 
+// Parse incoming JSON requests
 app.use(express.json());
 
-app.use(express.urlencoded({
-    extended: true,
-}));
+// Parse URL-encoded form data
+app.use(
+    express.urlencoded({
+        extended: true,
+    })
+);
 
 
 // ==========================================
@@ -30,10 +40,12 @@ app.use(express.urlencoded({
 // ==========================================
 
 app.get("/health", (req, res) => {
+
     return res.status(200).json({
         success: true,
         message: "SeatLock API is running",
     });
+
 });
 
 
@@ -56,14 +68,29 @@ app.use(
     showtimeRoutes
 );
 
+// Seat routes contain two route groups:
+//
+// GET/POST /api/showtimes/:showtimeId/seats
+// POST/DELETE /api/seats/:seatId/hold
+
 app.use(
     "/api/showtimes",
     seatRoutes
 );
 
-//carefull
-app.use("/api/seats", seatRoutes);
-//carefull
+app.use(
+    "/api/seats",
+    seatRoutes
+);
+
+// Booking routes
+//
+// POST /api/bookings
+
+app.use(
+    "/api/bookings",
+    bookingRoutes
+);
 
 
 // ==========================================
@@ -71,11 +98,23 @@ app.use("/api/seats", seatRoutes);
 // ==========================================
 
 app.use((req, res) => {
+
     return res.status(404).json({
         success: false,
         message: `Route ${req.method} ${req.originalUrl} not found`,
     });
+
 });
+
+
+// ==========================================
+// GLOBAL ERROR HANDLER
+// ==========================================
+
+// IMPORTANT:
+// This must be AFTER all routes and the 404 handler.
+
+app.use(errorHandler);
 
 
 export default app;
