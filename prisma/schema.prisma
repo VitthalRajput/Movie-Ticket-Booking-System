@@ -118,14 +118,18 @@ model BookingSeat {
 
 
 model Payment {
-  id              String   @id @default(uuid())
-  bookingId       String   @unique @map("booking_id")
-  stripeIntentId  String?  @unique @map("stripe_intent_id")
-  amount          Decimal
-  status          PaymentStatus    @default(pending)
-  createdAt       DateTime @default(now()) @map("created_at")
+  id                String        @id @default(uuid())
+  bookingId         String        @unique @map("booking_id")
+  provider          String        @default("razorpay")
+  providerOrderId   String?       @unique @map("provider_order_id")
+  providerPaymentId String?       @unique @map("provider_payment_id")
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+  status            PaymentStatus @default(pending)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
-  booking         Booking  @relation(fields: [bookingId], references: [id])
+  booking           Booking       @relation(fields: [bookingId], references: [id])
 
   @@map("payments")
 }
